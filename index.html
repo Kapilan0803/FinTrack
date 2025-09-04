@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vasool - Loan Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="app-title">💰 Vasool</h1>
+                
+            </div>
+            <div class="header-right">
+                    <span class="user-info">Welcome, Kapilan</span>
+                    <div class="date-display" id="currentDate"></div>
+                    <div class="time-display" id="currentTime"></div>
+                    <div class="header-icons">
+                    <button class="icon-btn" title="Logout" onclick="app.logout()">🚪</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="customer">
+                            <span class="nav-icon">👥</span>
+                            <span>Customer</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="collection">
+                            <span class="nav-icon">💸</span>
+                            <span>Collection</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="daily">
+                            <span class="nav-icon">📅</span>
+                            <span>Daily Loans</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="monthly">
+                            <span class="nav-icon">📆</span>
+                            <span>Monthly Loans</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="investment">
+                            <span class="nav-icon">📈</span>
+                            <span>Investment</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="reports">
+                            <span class="nav-icon">📋</span>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="cashout">
+                            <span class="nav-icon">💰</span>
+                            <span>Cashout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div id="content-area">
+                    <!-- Content will be dynamically loaded here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Record Payment</h3>
+                <button class="close-btn" onclick="app.closeModal('paymentModal')">&times;</button>
+            </div>
+            <form id="quickPaymentForm">
+                <div class="form-group">
+                    <label class="form-label">Payment Amount</label>
+                    <input type="number" id="quickPaymentAmount" class="form-input" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select id="quickPaymentMethod" class="form-input">
+                        <option value="cash">Cash</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="upi">UPI</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes (Optional)</label>
+                    <input type="text" id="quickPaymentNotes" class="form-input" placeholder="Add payment notes...">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">Record Payment</button>
+                    <button type="button" class="btn btn-secondary" onclick="app.closeModal('paymentModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        Operation completed successfully!
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
