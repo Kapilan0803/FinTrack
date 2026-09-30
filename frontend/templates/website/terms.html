@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - FinTrack{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
+    <nav class="bg-slate-900/90 border-b border-slate-800 py-4 px-6">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="{% url 'website:home' %}" class="flex items-center gap-2.5">
+                <img src="/static/images/fintrack-icon.png" alt="FinTrack Logo" class="w-8 h-8 rounded-xl object-contain">
+                <span class="font-extrabold text-lg text-white">FinTrack</span>
+            </a>
+            <a href="{% url 'website:home' %}" class="text-xs font-semibold text-emerald-400 hover:underline">&larr; Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6 py-12 flex-1">
+        <h1 class="text-3xl font-black text-white mb-4">Terms of Service</h1>
+        <p class="text-xs text-slate-400 mb-8">Effective Date: September 2026</p>
+
+        <div class="space-y-6 text-sm text-slate-300 leading-relaxed">
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">1. The Platform Service</h2>
+                <p>FinTrack is an operational software tool for recording loan installment schedules and collections. FinTrack is not a bank, NBFC, or credit grantor, and does not lend capital or offer debt settlement services.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">2. Free Trial and Subscriptions</h2>
+                <p>New business accounts receive a 30-day free trial. Following expiration of the trial, an active annual subscription of ₹1,000 (+ applicable GST) is required to maintain system write and collection access.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">3. User Responsibilities</h2>
+                <p>You agree to adhere to all applicable Indian lending laws, RBI guidelines (where applicable to NBFCs), and data privacy regulations when onboarding borrowers and recording collections.</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

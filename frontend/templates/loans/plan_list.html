@@ -1,0 +1,66 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Loan Plans{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Loan Product Plans</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pre-configured interest rates, loan tenures and late fee rules.</p>
+        </div>
+        <a href="{% url 'loans:plan_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all">
+            <i data-lucide="plus" class="w-4 h-4"></i> Create Loan Plan
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for p in plans %}
+        <div class="p-6 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
+                        {{ p.get_loan_type_display }}
+                    </span>
+                    {% if p.is_active %}
+                    <span class="text-[10px] font-bold text-emerald-600">● Active</span>
+                    {% else %}
+                    <span class="text-[10px] font-bold text-slate-400">● Disabled</span>
+                    {% endif %}
+                </div>
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white mb-3">{{ p.name }}</h3>
+
+                <div class="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Default Rate:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ p.default_interest_rate_percent }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Duration:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ p.default_duration_units }} Installments</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Processing Fee:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ p.processing_fee_percent }}%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Late Fee Penalty:</span>
+                        <span class="font-bold text-rose-500">{{ p.penalty_rate_percent }}% / day</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <a href="{% url 'loans:loan_create' %}?plan={{ p.id }}" class="w-full block text-center py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors">
+                    Issue Loan with this Plan
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full p-12 text-center bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-400 text-sm">
+            No loan plans created yet. You can create custom plans like "Daily 100 Days" or "Weekly 15 Weeks".
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

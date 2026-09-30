@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt #{{ payment.receipt_number }} - {{ payment.company.name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .receipt-box {
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 80mm !important;
+                padding: 2mm !important;
+            }
+        }
+        .receipt-box {
+            width: 100%;
+            max-width: 80mm;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-8 flex flex-col items-center justify-center p-4">
+
+    <!-- Action Buttons (No Print) -->
+    <div class="no-print flex items-center gap-3 mb-6">
+        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition-all">
+            <i data-lucide="printer" class="w-4 h-4"></i> Print Receipt (Thermal / A4)
+        </button>
+        <a href="{{ whatsapp_url }}" target="_blank" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg transition-all">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Share on WhatsApp
+        </a>
+        <a href="{% url 'collections:today' %}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs transition-colors">
+            &larr; Today's Sheet
+        </a>
+    </div>
+
+    <!-- Thermal Printable Receipt Card (80mm standard width) -->
+    <div class="receipt-box bg-white p-6 rounded-2xl shadow-xl border border-slate-200 text-slate-900 text-xs">
+        <!-- Company Header -->
+        <div class="text-center pb-3 border-b-2 border-dashed border-slate-300">
+            <h1 class="text-base font-black tracking-tight uppercase">{{ payment.company.name }}</h1>
+            <p class="text-[11px] text-slate-600 mt-0.5">{{ payment.company.phone }}</p>
+            {% if payment.company.address %}
+            <p class="text-[10px] text-slate-500 mt-0.5">{{ payment.company.address }}</p>
+            {% endif %}
+            <p class="font-bold text-[11px] mt-2 bg-slate-100 py-1 rounded">*** PAYMENT RECEIPT ***</p>
+        </div>
+
+        <!-- Receipt Metadata -->
+        <div class="py-3 border-b border-dashed border-slate-200 space-y-1.5 text-[11px]">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Receipt No:</span>
+                <span class="font-bold">{{ payment.receipt_number }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Date & Time:</span>
+                <span class="font-bold">{{ payment.payment_date|date:"d/m/Y h:i A" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Loan Account:</span>
+                <span class="font-bold">{{ payment.loan.loan_account_no }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Borrower:</span>
+                <span class="font-bold">{{ payment.loan.member.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Mobile:</span>
+                <span class="font-bold">{{ payment.loan.member.phone }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Payment Mode:</span>
+                <span class="font-bold uppercase">{{ payment.get_payment_mode_display }}</span>
+            </div>
+            {% if payment.reference_number %}
+            <div class="flex justify-between">
+                <span class="text-slate-500">UTR / Ref:</span>
+                <span class="font-bold">{{ payment.reference_number }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Amount Box -->
+        <div class="py-4 border-b-2 border-dashed border-slate-300 text-center">
+            <p class="text-[10px] uppercase font-bold text-slate-500">Amount Received</p>
+            <p class="text-2xl font-black text-slate-900 mt-1">₹{{ payment.amount }}</p>
+            {% if payment.penalty_collected > 0 %}
+            <p class="text-[10px] text-rose-600 font-bold mt-1">(Includes ₹{{ payment.penalty_collected }} Late Penalty Fee)</p>
+            {% endif %}
+            {% if payment.penalty_waived > 0 %}
+            <p class="text-[10px] text-emerald-600 font-bold mt-1">(Waived Late Fee: ₹{{ payment.penalty_waived }})</p>
+            {% endif %}
+        </div>
+
+        <!-- Loan Ledger Balance -->
+        <div class="py-3 border-b border-dashed border-slate-200 space-y-1 text-[11px]">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Total Loan Amount:</span>
+                <span>₹{{ payment.loan.total_amount }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Total Paid Till Date:</span>
+                <span>₹{{ payment.loan.total_paid }}</span>
+            </div>
+            <div class="flex justify-between font-bold text-[12px] pt-1">
+                <span>Remaining Balance:</span>
+                <span class="text-rose-600 font-black">₹{{ payment.loan.outstanding_balance }}</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pt-4 text-[10px] text-slate-500 space-y-1">
+            <p>Collected by: <strong>{{ payment.collected_by.get_full_name|default:payment.collected_by.username }}</strong></p>
+            <p class="italic mt-2">Thank you for your prompt repayment!</p>
+            <p class="text-[9px] text-slate-400 mt-3 border-t border-slate-100 pt-2">Powered by FinTrack Lending OS</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

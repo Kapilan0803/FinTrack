@@ -1,0 +1,112 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Loan {{ loan.loan_account_no }}{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <!-- Top Loan Summary Card -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-slate-800 dark:text-slate-200">
+                    {{ loan.loan_account_no }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black {% if loan.status == 'ACTIVE' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800{% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                    {{ loan.status }}
+                </span>
+                <span class="text-xs text-slate-400">({{ loan.get_loan_type_display }})</span>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 dark:text-white mt-2">
+                Borrower: <a href="{% url 'members:member_detail' loan.member.pk %}" class="hover:text-emerald-600 underline">{{ loan.member.name }}</a>
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Issued: {{ loan.start_date|date:"d M Y" }} • Maturity: {{ loan.end_date|date:"d M Y" }} • Agent: {% if loan.assigned_agent %}{{ loan.assigned_agent.get_full_name|default:loan.assigned_agent.username }}{% else %}Unassigned{% endif %}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            {% if loan.status == 'ACTIVE' and can_manage %}
+            <a href="{% url 'loans:loan_close' loan.pk %}" onclick="return confirm('Are you sure you want to close this loan account?')" class="px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 font-bold text-xs hover:bg-rose-100 transition-all">
+                Close / Foreclose Loan
+            </a>
+            {% endif %}
+            <a href="{% url 'loans:loan_list' %}" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-all">
+                &larr; Back to Loans
+            </a>
+        </div>
+    </div>
+
+    <!-- Financial Breakdown Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-slate-400">Principal Disbursed</p>
+            <p class="text-xl font-black text-slate-900 dark:text-white mt-1">₹{{ loan.principal_amount }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">Disbursed net: ₹{{ loan.disbursed_amount }}</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-slate-400">Total Repayable</p>
+            <p class="text-xl font-black text-slate-900 dark:text-white mt-1">₹{{ loan.total_amount }}</p>
+            <p class="text-[10px] text-emerald-600 font-bold mt-0.5">Interest: ₹{{ loan.interest_amount }} ({{ loan.interest_rate_percent }}%)</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-emerald-600">Total Paid</p>
+            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">₹{{ loan.total_paid }}</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">{{ paid_count }} / {{ loan.number_of_installments }} EMIs paid</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-rose-500">Remaining Balance</p>
+            <p class="text-xl font-black text-rose-500 mt-1">₹{{ loan.outstanding_balance }}</p>
+            <p class="text-[10px] text-rose-400 font-bold mt-0.5">{{ overdue_count }} overdue EMIs</p>
+        </div>
+    </div>
+
+    <!-- Installment Amortization Table -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div>
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Repayment Schedule ({{ installments.count }} Installments)</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Exact date, due amount, payment status, and receipts.</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/80 sticky top-0 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-400 z-10">
+                    <tr>
+                        <th class="px-6 py-3">#</th>
+                        <th class="px-6 py-3">Due Date</th>
+                        <th class="px-6 py-3">Expected (₹)</th>
+                        <th class="px-6 py-3">Paid (₹)</th>
+                        <th class="px-6 py-3">Pending (₹)</th>
+                        <th class="px-6 py-3">Late Penalty</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3">Paid Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-xs">
+                    {% for inst in installments %}
+                    <tr class="{% if inst.status == 'PAID' %}bg-emerald-50/20 dark:bg-emerald-950/10{% elif inst.status == 'OVERDUE' %}bg-rose-50/30 dark:bg-rose-950/20{% endif %} hover:bg-slate-50/80 dark:hover:bg-slate-800/30">
+                        <td class="px-6 py-3 font-sans font-bold text-slate-400">{{ inst.installment_number }}</td>
+                        <td class="px-6 py-3 font-sans font-semibold text-slate-800 dark:text-slate-200">{{ inst.due_date|date:"d M Y (D)" }}</td>
+                        <td class="px-6 py-3 font-bold text-slate-900 dark:text-white">₹{{ inst.expected_amount }}</td>
+                        <td class="px-6 py-3 text-emerald-600 font-bold">₹{{ inst.paid_amount }}</td>
+                        <td class="px-6 py-3 {% if inst.pending_amount > 0 %}text-rose-500 font-bold{% else %}text-slate-400{% endif %}">₹{{ inst.pending_amount }}</td>
+                        <td class="px-6 py-3 font-sans">
+                            {% if inst.penalty_amount > 0 %}
+                            <span class="text-rose-600 font-bold">₹{{ inst.penalty_amount }}</span>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-3 font-sans">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black {% if inst.status == 'PAID' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400{% elif inst.status == 'OVERDUE' %}bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400{% elif inst.status == 'PARTIALLY_PAID' %}bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400{% else %}bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400{% endif %}">
+                                {{ inst.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3 font-sans text-slate-500">{{ inst.paid_date|date:"d M Y"|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

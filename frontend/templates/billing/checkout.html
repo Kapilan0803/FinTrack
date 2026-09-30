@@ -1,0 +1,94 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Checkout - Annual Subscription{% endblock %}
+
+{% block app_content %}
+<div class="max-w-xl mx-auto">
+    <div class="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+        <div class="text-center pb-4 border-b border-slate-100 dark:border-slate-800">
+            <span class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center mx-auto mb-2">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </span>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Annual Subscription Checkout</h2>
+            <p class="text-xs text-slate-400 mt-1">Company: <strong>{{ company.name }}</strong></p>
+        </div>
+
+        <div class="space-y-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 text-xs">
+            <div class="flex justify-between">
+                <span class="text-slate-500">Plan:</span>
+                <span class="font-bold text-slate-900 dark:text-white">{{ plan.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">Base Price:</span>
+                <span class="font-bold text-slate-900 dark:text-white">₹{{ plan.price }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-slate-500">GST (18%):</span>
+                <span class="font-bold text-slate-900 dark:text-white">₹180.00</span>
+            </div>
+            <div class="flex justify-between text-sm font-black pt-2 border-t border-slate-200 dark:border-slate-700">
+                <span class="text-slate-900 dark:text-white">Total Payable:</span>
+                <span class="text-emerald-600">₹{{ plan.total_price }}</span>
+            </div>
+        </div>
+
+        <form id="verifyForm" method="POST" action="{% url 'billing:verify_payment' %}">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_order_id" id="rzp_order_id" value="{{ order_id }}">
+            <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id" value="">
+            <input type="hidden" name="razorpay_signature" id="rzp_signature" value="">
+
+            <button type="button" id="rzp-button" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Pay ₹{{ plan.total_price }} with Razorpay</span>
+            </button>
+        </form>
+
+        <div class="text-center pt-2">
+            <a href="{% url 'billing:pricing' %}" class="text-xs font-semibold text-slate-400 hover:text-slate-600">
+                &larr; Back to Plans
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ plan.total_price|floatformat:0 }}00",
+        "currency": "INR",
+        "name": "FinTrack",
+        "description": "Annual Subscription - {{ company.name|escapejs }}",
+        "order_id": "{{ order_id }}",
+        "handler": function (response){
+            document.getElementById('rzp_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('rzp_order_id').value = response.razorpay_order_id;
+            document.getElementById('rzp_signature').value = response.razorpay_signature;
+            document.getElementById('verifyForm').submit();
+        },
+        "prefill": {
+            "name": "{{ user.get_full_name|default:user.username|escapejs }}",
+            "email": "{{ user.email|escapejs }}",
+            "contact": "{{ user.phone_number|escapejs }}"
+        },
+        "theme": {
+            "color": "#059669"
+        }
+    };
+
+    document.getElementById('rzp-button').onclick = function(e){
+        e.preventDefault();
+        // If in development with mock order
+        if ("{{ order_id }}".includes("order_mock_") || "{{ order_id }}".includes("order_dev_")) {
+            // Direct mock submit for smooth dev verification
+            document.getElementById('rzp_payment_id').value = "pay_mock_" + Math.random().toString(36).substring(7);
+            document.getElementById('rzp_signature').value = "sig_mock_" + Math.random().toString(36).substring(7);
+            document.getElementById('verifyForm').submit();
+            return;
+        }
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+    }
+</script>
+{% endblock %}

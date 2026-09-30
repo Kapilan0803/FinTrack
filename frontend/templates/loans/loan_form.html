@@ -1,0 +1,80 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block app_content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">{{ title }}</h2>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Borrower / Member *</label>
+                {{ form.member }}
+                {% if form.member.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.member.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Loan Plan (Optional)</label>
+                    {{ form.loan_plan }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Loan Frequency & Type *</label>
+                    {{ form.loan_type }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Principal Amount (₹) *</label>
+                    {{ form.principal_amount }}
+                    {% if form.principal_amount.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.principal_amount.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Interest Rate (%) *</label>
+                    {{ form.interest_rate_percent }}
+                    {% if form.interest_rate_percent.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.interest_rate_percent.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">No. of Installments *</label>
+                    {{ form.number_of_installments }}
+                    {% if form.number_of_installments.errors %}<p class="text-xs text-rose-500 mt-1">{{ form.number_of_installments.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Processing Fee (₹)</label>
+                    {{ form.processing_fee }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Start / First EMI Date *</label>
+                    {{ form.start_date }}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Assigned Collection Agent</label>
+                {{ form.assigned_agent }}
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Internal Notes</label>
+                {{ form.notes }}
+            </div>
+
+            <div class="pt-4 flex gap-3">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition-all">
+                    Generate Repayment Schedule & Issue Loan
+                </button>
+                <a href="{% url 'loans:loan_list' %}" class="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-all">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

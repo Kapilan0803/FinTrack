@@ -1,0 +1,669 @@
+{% extends "base.html" %}
+
+{% block title %}FinTrack – Modern Loan Collection & Recovery Platform India{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+
+    <!-- Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 py-3 flex items-center justify-between gap-4">
+            <a href="{% url 'website:home' %}" class="flex items-center gap-3">
+                <img src="/static/images/fintrack-icon.png" alt="FinTrack Logo" width="36" height="36" style="width:36px;height:36px;max-width:36px;max-height:36px;object-fit:contain;" class="w-9 h-9 rounded-xl shadow-sm object-contain flex-shrink-0">
+                <div>
+                    <span class="font-black text-lg tracking-tight text-slate-900">Fin<span class="text-emerald-600">Track</span></span>
+                    <span class="block text-[9px] text-slate-500 font-bold uppercase tracking-wider -mt-0.5">Lending OS</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                <a href="#features" class="hover:text-emerald-600 transition-colors">Features</a>
+                <a href="#loan-types" class="hover:text-emerald-600 transition-colors">Loan Types</a>
+                <a href="#calculator" class="hover:text-emerald-600 transition-colors">Calculator</a>
+                <a href="#how-it-works" class="hover:text-emerald-600 transition-colors">How It Works</a>
+                <a href="#pricing" class="hover:text-emerald-600 transition-colors">Pricing</a>
+                <a href="#faq" class="hover:text-emerald-600 transition-colors">FAQ</a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{% url 'accounts:login' %}" class="text-sm font-semibold text-slate-700 hover:text-slate-900 px-3.5 py-2 rounded-xl hover:bg-slate-100 transition-colors">
+                    Login
+                </a>
+                <a href="{% url 'accounts:signup' %}" class="text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-4.5 py-2 rounded-xl shadow-sm shadow-emerald-600/20 transition-all">
+                    Start Free Trial
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative overflow-hidden bg-gradient-to-b from-emerald-50/50 via-white to-slate-50 pt-14 pb-20 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 relative">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <!-- Left Hero Copy -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-bold tracking-wide shadow-xs">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i> India's Modern Loan Collection OS
+                    </div>
+
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                        Supercharge Your <span class="text-emerald-600">Loan Collections</span> with a Smart Mobile Ledger
+                    </h1>
+
+                    <p class="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                        Designed for microfinance companies, NBFCs, chit funds, and private lenders. Track daily, weekly, and monthly collections with a 1-tap mobile sheet for field agents, instant WhatsApp receipts, and automated defaulter tracking.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start pt-2">
+                        <a href="{% url 'accounts:signup' %}" class="inline-flex items-center justify-center gap-2 text-sm sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-3.5 rounded-xl shadow-md shadow-emerald-600/25 transition-all">
+                            <span>Start 30-Day Free Trial</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                        <a href="#calculator" class="inline-flex items-center justify-center gap-2 text-sm sm:text-base font-semibold bg-white hover:bg-slate-50 text-slate-700 px-6 py-3.5 rounded-xl border border-slate-300 shadow-xs transition-all">
+                            <i data-lucide="calculator" class="w-4 h-4 text-emerald-600"></i>
+                            <span>Try Loan Calculator</span>
+                        </a>
+                    </div>
+
+                    <!-- Trust checklist -->
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2 text-xs font-semibold text-slate-600">
+                        <span class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> No credit card required</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> 1-Tap Agent Mobile UX</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Thermal & WhatsApp Receipts</span>
+                    </div>
+                </div>
+
+                <!-- Right Hero Mockup -->
+                <div class="lg:col-span-5 relative">
+                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60 relative">
+                        <!-- Header status -->
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Today's Collections</p>
+                                <p class="text-[11px] text-slate-500 font-medium">Live Agent Field Sync</p>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-[10px] flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> LIVE
+                            </span>
+                        </div>
+
+                        <!-- Metric cards preview -->
+                        <div class="grid grid-cols-2 gap-3 my-4">
+                            <div class="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100">
+                                <p class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Collected Today</p>
+                                <p class="text-2xl font-black text-emerald-700 mt-1">₹48,500</p>
+                                <p class="text-[10px] text-emerald-600 font-semibold mt-0.5">82% of target</p>
+                            </div>
+                            <div class="p-3.5 rounded-xl bg-amber-50/60 border border-amber-100">
+                                <p class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Pending Today</p>
+                                <p class="text-2xl font-black text-amber-700 mt-1">₹10,500</p>
+                                <p class="text-[10px] text-amber-600 font-semibold mt-0.5">6 members left</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Sample -->
+                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center border border-emerald-200">
+                                        MR
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900">Meena Ramesh</p>
+                                        <p class="text-[10px] text-slate-500">LN-00104 • North Ward</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-[9px]">PAID</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-1.5 border-t border-slate-200/80">
+                                <span class="text-slate-600">Collected: <strong class="text-slate-900">₹300</strong></span>
+                                <span class="text-emerald-700 font-bold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> Receipt Sent
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 7-Day Trend Preview -->
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <div class="flex items-center justify-between text-[11px] text-slate-600 font-semibold mb-2">
+                                <span>7-Day Recovery Trend</span>
+                                <span class="text-emerald-700 font-bold">₹3.28 Lakhs</span>
+                            </div>
+                            <div class="flex items-end gap-2 h-12 pt-2">
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[45%] transition-colors"></div>
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[60%] transition-colors"></div>
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[50%] transition-colors"></div>
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[75%] transition-colors"></div>
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[65%] transition-colors"></div>
+                                <div class="flex-1 bg-slate-200 hover:bg-emerald-300 rounded-t h-[90%] transition-colors"></div>
+                                <div class="flex-1 bg-emerald-600 rounded-t h-[80%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TRUST STATS -->
+    <section class="py-10 bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+                <p class="text-3xl sm:text-4xl font-black text-slate-900">500+</p>
+                <p class="text-sm font-bold text-slate-800 mt-1">Finance Businesses</p>
+                <p class="text-xs text-slate-500">across 20+ Indian states</p>
+            </div>
+            <div>
+                <p class="text-3xl sm:text-4xl font-black text-emerald-600">₹60Cr+</p>
+                <p class="text-sm font-bold text-slate-800 mt-1">Collections Tracked</p>
+                <p class="text-xs text-slate-500">with zero ledger errors</p>
+            </div>
+            <div>
+                <p class="text-3xl sm:text-4xl font-black text-slate-900">30,000+</p>
+                <p class="text-sm font-bold text-slate-800 mt-1">Active Borrowers</p>
+                <p class="text-xs text-slate-500">onboarded with KYC</p>
+            </div>
+            <div>
+                <p class="text-3xl sm:text-4xl font-black text-emerald-600">99.9%</p>
+                <p class="text-sm font-bold text-slate-800 mt-1">Uptime Reliability</p>
+                <p class="text-xs text-slate-500">cloud infrastructure</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE PROBLEM VS SOLUTION -->
+    <section id="features" class="py-18 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <p class="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-1.5">Efficiency & Accuracy</p>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Still tracking daily EMI in Excel and notebooks?</h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-2.5">Spreadsheets work when you have 15 loans. At 100+ loans, it leads to missing cash, untracked defaults, and reconciliation errors.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Bad Way -->
+                <div class="p-7 rounded-2xl border border-rose-200 bg-white shadow-xs space-y-4">
+                    <div class="flex items-center gap-3 text-rose-700 font-bold text-base">
+                        <i data-lucide="x-circle" class="w-5 h-5 text-rose-500"></i> The Manual & Spreadsheet Way
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>Scattered files:</strong> Every agent maintains separate books. Evening reconciliation takes 2 hours.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>Unnoticed defaults:</strong> Overdue loans are caught weeks later when borrowers have already defaulted.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>No cash audit:</strong> Difficult to verify how much cash an agent collected versus what was handed over.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Good Way: FinTrack -->
+                <div class="p-7 rounded-2xl border-2 border-emerald-500/70 bg-white shadow-sm space-y-4">
+                    <div class="flex items-center gap-3 text-emerald-700 font-bold text-base">
+                        <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i> The FinTrack Platform Way
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>One Live Cloud Ledger:</strong> Field collections instantly update the office dashboard in real-time.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>Automated Overdue Flagging:</strong> Real-time defaulter registers calculate daily penalty fees automatically.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                            <span><strong>Single-Tap Agent Collection:</strong> Large mobile buttons, thermal Bluetooth receipts, and WhatsApp confirmations.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5 LOAN TYPES -->
+    <section id="loan-types" class="py-18 bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <p class="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-1.5">Lending Models</p>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Built for Standard Indian Lending Structures</h2>
+                <p class="text-slate-600 text-sm sm:text-base mt-2.5">From daily market collection to monthly business and gold loans, schedules calculate accurately out of the box.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 1. Daily -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="calendar" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Daily Collection Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        e.g., 50 or 100 days micro-loans. Collect fixed daily EMI. Configure automatic Sunday exclusion to match local market rules.
+                    </p>
+                </div>
+
+                <!-- 2. Weekly -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="calendar-range" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Weekly Collection Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        e.g., 10, 15, or 20 weeks. Ideal for vegetable and market vendors with weekly installment schedules.
+                    </p>
+                </div>
+
+                <!-- 3. Monthly EMI -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="calendar-days" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Monthly EMI Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Standard equal monthly installments (Principal + Interest) over 3, 6, 12, or 24 month tenures.
+                    </p>
+                </div>
+
+                <!-- 4. Monthly Interest Only -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="percent" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Monthly Interest Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Collect interest monthly while principal remains outstanding. Full bullet principal settled on the maturity date.
+                    </p>
+                </div>
+
+                <!-- 5. Weekly Interest Only -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="coins" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Weekly Interest Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Collect interest on a weekly basis, with full lump-sum principal settled at final loan closure.
+                    </p>
+                </div>
+
+                <!-- 6. Excel & PDF Reports -->
+                <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-500/60 hover:shadow-md transition-all">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 flex items-center justify-center font-bold mb-4">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-700"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Excel & PDF Registers</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Download formatted daily collection registers, agent performance reports, and customer statements in seconds.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE CALCULATOR -->
+    <section id="calculator" class="py-16 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <!-- DhanCollect loan calculator: paste this whole block into your welcome page template.
+                 Self-contained (no Tailwind/HTMX needed). All CSS is scoped under .dc-calc.
+                 Force a theme with data-theme="dark" or data-theme="light" on the <section>. -->
+            <section class="dc-calc" id="dc-calc" data-theme="light" aria-labelledby="dc-title">
+            <style>
+            .dc-calc{--bg:#ffffff;--panel:#f2f7f4;--ink:#12241b;--mute:#5a6f64;--line:#d5e0d9;--acc:#0f6b4a;--accbg:#e1f1e9;--on:#fff;
+              max-width:960px;margin:0 auto;padding:24px 16px;color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;line-height:1.5}
+            @media (prefers-color-scheme:dark){.dc-calc:not([data-theme="light"]){--bg:#111b16;--panel:#16231c;--ink:#e6f0ea;--mute:#93a79c;--line:#2a3a31;--acc:#4cc394;--accbg:#1c3128;--on:#0c1a13}}
+            .dc-calc[data-theme="dark"]{--bg:#111b16;--panel:#16231c;--ink:#e6f0ea;--mute:#93a79c;--line:#2a3a31;--acc:#4cc394;--accbg:#1c3128;--on:#0c1a13}
+            .dc-calc *{box-sizing:border-box}
+            .dc-calc h2{font-size:1.6rem;margin:0 0 4px}
+            .dc-calc h3{font-size:1.1rem;margin:0 0 2px}
+            .dc-calc .dc-sub{margin:0 0 20px;color:var(--mute)}
+            .dc-calc .dc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+            @media(max-width:760px){.dc-calc .dc-grid{grid-template-columns:1fr}}
+            .dc-calc .dc-card{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:20px}
+            .dc-calc label,.dc-calc .dc-lbl{display:block;font-size:.85rem;color:var(--mute);margin:14px 0 5px}
+            .dc-calc .dc-lbl:first-child{margin-top:0}
+            .dc-calc input[type=number]{width:100%;padding:10px 12px;font-size:1rem;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);color-scheme:light dark}
+            .dc-calc input:focus-visible,.dc-calc .dc-seg input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+            .dc-calc .dc-seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+            .dc-calc .dc-seg label{margin:0;color:var(--ink);cursor:pointer}
+            .dc-calc .dc-seg input{position:absolute;opacity:0;pointer-events:none}
+            .dc-calc .dc-seg span{display:block;text-align:center;padding:10px 6px;font-weight:600;background:var(--panel)}
+            .dc-calc .dc-seg input:checked+span{background:var(--acc);color:var(--on)}
+            .dc-calc .dc-main{background:var(--accbg);border-radius:12px;padding:16px;margin-bottom:12px}
+            .dc-calc .dc-main small{color:var(--mute)}
+            .dc-calc .dc-main div{font-size:2.1rem;font-weight:700;color:var(--acc)}
+            .dc-calc dl{margin:0}
+            .dc-calc dl>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+            .dc-calc dl>div:last-child{border-bottom:0}
+            .dc-calc dt{color:var(--mute)}.dc-calc dd{margin:0;font-weight:600;text-align:right}
+            .dc-calc .dc-note{font-size:.8rem;color:var(--mute);margin:10px 0 0}
+            </style>
+
+            <h2 id="dc-title">Loan calculator</h2>
+            <p class="dc-sub">Pick a loan type, tenure, and amount to calculate estimated installments.</p>
+
+            <div class="dc-grid">
+              <div class="dc-card">
+                <div class="dc-lbl" id="dc-type-l">Loan type</div>
+                <div class="dc-seg" role="radiogroup" aria-labelledby="dc-type-l">
+                  <label><input type="radio" name="dc-type" value="daily"><span>Daily</span></label>
+                  <label><input type="radio" name="dc-type" value="weekly"><span>Weekly</span></label>
+                  <label><input type="radio" name="dc-type" value="monthly" checked><span>Monthly</span></label>
+                </div>
+
+                <label for="dc-n" id="dc-n-l">How many months?</label>
+                <input id="dc-n" type="number" inputmode="numeric" min="1" value="12">
+
+                <label for="dc-amt">Loan amount (₹)</label>
+                <input id="dc-amt" type="number" inputmode="decimal" min="0" value="100000" data-test="calc-principal">
+
+                <label for="dc-rate">Interest rate (% per year)</label>
+                <input id="dc-rate" type="number" inputmode="decimal" min="0" step="0.1" value="24">
+              </div>
+
+              <div class="dc-card" aria-live="polite">
+                <div class="dc-main"><small id="dc-inst-l">Monthly EMI</small><div id="dc-inst">–</div></div>
+                <dl>
+                  <div><dt>Total interest</dt><dd id="dc-int">–</dd></div>
+                  <div><dt>Total repayable</dt><dd id="dc-tot">–</dd></div>
+                </dl>
+                <p class="dc-note">This is an estimate; the final terms are set when your loan is approved.</p>
+              </div>
+            </div>
+
+            <script>
+            (function(){
+              var root=document.getElementById("dc-calc");
+              if(!root)return;
+              var $=function(id){return root.querySelector("#"+id)};
+              var T={
+                daily:{ppy:365,q:"How many days?",label:"Daily installment",n:100,flat:true},
+                weekly:{ppy:52,q:"How many weeks?",label:"Weekly installment",n:20,flat:true},
+                monthly:{ppy:12,q:"How many months?",label:"Monthly EMI",n:12,flat:false}
+              };
+              var inr=function(x){return "₹"+Number(x).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})};
+              var type=function(){return root.querySelector("input[name=dc-type]:checked").value};
+
+              function calc(){
+                var tp=type(),t=T[tp],P=+$("dc-amt").value,R=+$("dc-rate").value,n=Math.round(+$("dc-n").value);
+                if(!(P>0)||!(n>0)||!(R>=0)){
+                  ["dc-inst","dc-int","dc-tot"].forEach(function(k){var el=$(k);if(el)el.textContent="–"});
+                  return;
+                }
+                var r=R/100/t.ppy,inst,interest;
+                if(t.flat){
+                  interest=P*(R/100)*(n/t.ppy);
+                  inst=(P+interest)/n;
+                }else{
+                  inst=r===0?P/n:P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+                  interest=inst*n-P;
+                }
+                if($("dc-inst"))$("dc-inst").textContent=inr(inst);
+                if($("dc-int"))$("dc-int").textContent=inr(interest);
+                if($("dc-tot"))$("dc-tot").textContent=inr(P+interest);
+              }
+
+              function setType(){
+                var tp=type(),t=T[tp];
+                if($("dc-n-l"))$("dc-n-l").textContent=t.q;
+                if($("dc-inst-l"))$("dc-inst-l").textContent=t.label;
+                if($("dc-n"))$("dc-n").value=t.n;
+                calc();
+              }
+
+              root.querySelectorAll("input[name=dc-type]").forEach(function(e){e.addEventListener("change",setType)});
+              root.querySelectorAll("input[type=number]").forEach(function(e){e.addEventListener("input",calc)});
+              setType();
+            })();
+            </script>
+            </section>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="py-18 bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <p class="text-emerald-700 text-xs font-bold uppercase tracking-widest mb-1.5">Getting Started</p>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900">Up and Running in 4 Minutes</h2>
+                <p class="text-slate-600 text-sm mt-2">Zero technical setup required. Accessible on any mobile browser or desktop.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 font-black text-base flex items-center justify-center mx-auto mb-4">1</div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Create Business Account</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Sign up with your business name and mobile number. Instant 30-day trial starts immediately.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 font-black text-base flex items-center justify-center mx-auto mb-4">2</div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Add Borrowers & KYC</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Record Aadhaar/PAN, photo, contact details, and assign customers to routes or agents.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 font-black text-base flex items-center justify-center mx-auto mb-4">3</div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Issue Loans</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Select daily, weekly or monthly. Full schedule is computed automatically with zero rounding errors.</p>
+                </div>
+
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-800 font-black text-base flex items-center justify-center mx-auto mb-4">4</div>
+                    <h3 class="font-bold text-base text-slate-900 mb-2">Collect in 1-Tap</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Field agents record payments in real-time, print thermal receipts, or share via WhatsApp.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section id="pricing" class="py-18 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-emerald-700 text-xs font-bold uppercase tracking-widest">Straightforward Pricing</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">One Simple, Affordable Plan</h2>
+                <p class="text-slate-600 text-sm mt-2">No per-loan charges. No per-agent fees. Full access included.</p>
+            </div>
+
+            <div class="p-8 sm:p-10 rounded-2xl border-2 border-emerald-600 bg-white shadow-xl shadow-emerald-600/5 relative">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-200">
+                    <div>
+                        <div class="inline-block bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-2">
+                            Annual Unlimited
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-900">Annual Unlimited Plan</h3>
+                        <p class="text-sm text-slate-600 mt-1">Complete system access for owners, managers, and field collection agents.</p>
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <div class="flex items-baseline justify-center sm:justify-end gap-1">
+                            <span class="text-4xl sm:text-5xl font-black text-slate-900">₹1,000</span>
+                            <span class="text-slate-500 text-sm font-semibold">/ year</span>
+                        </div>
+                        <p class="text-xs text-emerald-700 font-bold mt-1">~₹83 per month (+ 18% GST)</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 py-8 text-sm text-slate-700">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Unlimited Borrowers & Customers</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Daily, Weekly & Monthly Loans</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Unlimited Field Collection Agents</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Single-Tap Mobile Collection Sheet</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Thermal Bluetooth & WhatsApp Receipts</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Daily Excel & PDF Reports Export</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>Automated Overdue Defaulter Alerts</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+                        <span>30-Day Free Trial Included</span>
+                    </div>
+                </div>
+
+                <div class="text-center pt-2">
+                    <a href="{% url 'accounts:signup' %}" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto text-sm sm:text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl shadow-md shadow-emerald-600/20 transition-all">
+                        <span>Start Your 30-Day Free Trial</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ ACCORDION -->
+    <section id="faq" class="py-18 bg-white border-b border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="text-center mb-12">
+                <span class="text-emerald-700 text-xs font-bold uppercase tracking-widest">Common Questions</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-1">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="space-y-3.5">
+                <details class="group p-5 rounded-xl bg-slate-50 border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm sm:text-base">
+                        <span>What is FinTrack?</span>
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i></span>
+                    </summary>
+                    <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        FinTrack is a specialized cloud software platform designed for Indian lending businesses—including microfinance institutions, NBFCs, chit funds, and private financiers. It helps you manage borrowers, schedule daily/weekly/monthly loan installments, track field collections in real-time on mobile, and print thermal receipts.
+                    </p>
+                </details>
+
+                <details class="group p-5 rounded-xl bg-slate-50 border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm sm:text-base">
+                        <span>Does FinTrack work on field agents' smartphones?</span>
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i></span>
+                    </summary>
+                    <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Yes. The Today's Collection sheet is mobile-first and optimized for field agents. Agents can record payments with a single tap, handle partial amounts, share WhatsApp receipts, or print via Bluetooth thermal printers.
+                    </p>
+                </details>
+
+                <details class="group p-5 rounded-xl bg-slate-50 border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm sm:text-base">
+                        <span>How does Sunday skipping work for daily loans?</span>
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i></span>
+                    </summary>
+                    <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        FinTrack includes a business-level setting to automatically skip Sundays on daily loans, automatically shifting collection dates to the next working day to align with local weekly market closures.
+                    </p>
+                </details>
+
+                <details class="group p-5 rounded-xl bg-slate-50 border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm sm:text-base">
+                        <span>How much does it cost after the free trial?</span>
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i></span>
+                    </summary>
+                    <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        You receive an unrestricted 30-day free trial with no payment details needed. Following the trial, subscription is ₹1,000 per year (+ 18% GST), payable securely online via UPI, Cards, or Netbanking using Razorpay.
+                    </p>
+                </details>
+
+                <details class="group p-5 rounded-xl bg-slate-50 border border-slate-200 [&_summary::-webkit-details-marker]:hidden">
+                    <summary class="flex items-center justify-between cursor-pointer font-bold text-slate-900 text-sm sm:text-base">
+                        <span>Is our borrower data secure?</span>
+                        <span class="transition group-open:rotate-180"><i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i></span>
+                    </summary>
+                    <p class="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Yes. FinTrack implements strict multi-tenant database isolation ensuring each company only accesses its own records. All traffic is encrypted over SSL/TLS in compliance with the Digital Personal Data Protection (DPDP) Act 2023.
+                    </p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEMO REQUEST FORM -->
+    <section class="py-18 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6">
+            <div class="p-7 sm:p-10 rounded-2xl bg-white border border-slate-200 shadow-lg shadow-slate-200/50">
+                <div class="text-center mb-8">
+                    <span class="text-emerald-700 text-xs font-bold uppercase tracking-widest">Get in Touch</span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Request a 1-on-1 Product Demo</h2>
+                    <p class="text-slate-600 text-xs sm:text-sm mt-1.5">Have questions or want a walkthrough of the platform? We are happy to help.</p>
+                </div>
+
+                <form hx-post="{% url 'website:demo_request' %}" hx-swap="outerHTML" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Your Name *</label>
+                            <input type="text" name="name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="e.g. Anand Murthy">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Mobile / WhatsApp Number *</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="10-digit number">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Company / Business Name *</label>
+                            <input type="text" name="company_name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="e.g. Murthy Finance">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">City / State</label>
+                            <input type="text" name="city" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="e.g. Coimbatore, Tamil Nadu">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Email Address</label>
+                        <input type="email" name="email" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="anand@murthyfinance.com">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Primary Loan Types</label>
+                        <input type="text" name="loan_types" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none" placeholder="e.g. Daily chit, Weekly micro-finance, Monthly EMI">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-all">
+                        Request Callback & Demo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-10 text-slate-500 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <img src="/static/images/fintrack-icon.png" alt="FinTrack Logo" width="32" height="32" style="width:32px;height:32px;max-width:32px;max-height:32px;object-fit:contain;" class="w-8 h-8 rounded-xl object-contain shadow-xs flex-shrink-0">
+                <div>
+                    <span class="font-black text-slate-900 text-sm">FinTrack</span>
+                    <span class="block text-[10px] text-slate-500">© 2026 FinTrack Technologies. All rights reserved.</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-6 text-slate-600 font-medium">
+                <a href="{% url 'website:privacy' %}" class="hover:text-emerald-700 transition-colors">Privacy Policy (DPDP Act)</a>
+                <a href="{% url 'website:terms' %}" class="hover:text-emerald-700 transition-colors">Terms of Service</a>
+                <a href="mailto:support@fintrack.in" class="hover:text-emerald-700 transition-colors">support@fintrack.in</a>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Field Agent Performance & Cash Reconciliation{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <div>
+        <h2 class="text-xl font-black text-slate-900 dark:text-white">Field Agent Performance & Cash Handover</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track daily collection targets against actual recoveries and reconcile cash in hand.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for stat in agent_stats %}
+        <div class="p-6 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-black text-base flex items-center justify-center">
+                        {{ stat.agent.first_name|default:stat.agent.username|make_list|first|upper }}
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">{{ stat.agent.get_full_name|default:stat.agent.username }}</h3>
+                        <p class="text-xs text-slate-400">{{ stat.active_members_count }} assigned borrowers • {{ stat.agent.phone_number|default:"No phone" }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2 text-xs">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-slate-400">Daily Target:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">₹{{ stat.target }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-emerald-600 font-bold">Collected Today:</span>
+                        <span class="font-black text-emerald-600 dark:text-emerald-400 text-sm">₹{{ stat.collected_today }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800">
+                        <span class="text-blue-600 font-bold">Cash to Deposit:</span>
+                        <span class="font-black text-blue-600 dark:text-blue-400 text-sm">₹{{ stat.cash_in_hand }}</span>
+                    </div>
+
+                    <div class="pt-1">
+                        <div class="flex justify-between text-[11px] font-bold mb-1">
+                            <span class="text-slate-400">Target Achievement</span>
+                            <span class="text-emerald-600">{{ stat.perf_pct }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: {{ stat.perf_pct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 text-right">
+                All-time collections: <strong>₹{{ stat.total_all_time }}</strong>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full p-12 text-center bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-400 text-sm">
+            No active collection agents found. Go to "Team & Staff" to add field agents.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

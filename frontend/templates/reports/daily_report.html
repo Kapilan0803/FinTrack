@@ -1,0 +1,115 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Daily Collection Register{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Daily Collection Register</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Auditable transaction log for any date with Excel & PDF downloads.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="?date={{ target_date|date:'Y-m-d' }}&agent={{ selected_agent }}&mode={{ selected_mode }}&export=excel" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Download Excel
+            </a>
+            <a href="?date={{ target_date|date:'Y-m-d' }}&agent={{ selected_agent }}&mode={{ selected_mode }}&export=pdf" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all">
+                <i data-lucide="printer" class="w-4 h-4"></i> Export PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Form & Day Totals -->
+    <div class="p-5 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+        <form method="GET" class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Select Date</label>
+                <input type="date" name="date" value="{{ target_date|date:'Y-m-d' }}" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+            </div>
+
+            {% if can_manage and agents %}
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Agent</label>
+                <select name="agent" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                    <option value="">All Field Agents</option>
+                    {% for a in agents %}
+                    <option value="{{ a.id }}" {% if selected_agent == a.id|stringformat:"s" %}selected{% endif %}>{{ a.get_full_name|default:a.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Payment Mode</label>
+                <select name="mode" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                    <option value="">All Modes</option>
+                    <option value="CASH" {% if selected_mode == 'CASH' %}selected{% endif %}>Cash</option>
+                    <option value="UPI" {% if selected_mode == 'UPI' %}selected{% endif %}>UPI</option>
+                    <option value="BANK_TRANSFER" {% if selected_mode == 'BANK_TRANSFER' %}selected{% endif %}>Bank Transfer</option>
+                </select>
+            </div>
+        </form>
+
+        <div class="flex items-center gap-6 text-right">
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Total Collected</span>
+                <span class="text-xl font-black text-emerald-600 dark:text-emerald-400">₹{{ total_collected }}</span>
+            </div>
+            <div class="border-l border-slate-200 dark:border-slate-700 pl-4">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Cash: ₹{{ cash_total }}</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">UPI: ₹{{ upi_total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-400">
+                    <tr>
+                        <th class="px-6 py-3.5">Receipt No</th>
+                        <th class="px-6 py-3.5">Time</th>
+                        <th class="px-6 py-3.5">Borrower</th>
+                        <th class="px-6 py-3.5">Loan Account</th>
+                        <th class="px-6 py-3.5">Payment Mode</th>
+                        <th class="px-6 py-3.5">Collected By</th>
+                        <th class="px-6 py-3.5 text-right">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-xs">
+                    {% for p in payments %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td class="px-6 py-3.5 font-bold text-emerald-600">
+                            <a href="{% url 'collections:receipt' p.receipt_number %}" class="hover:underline">
+                                {{ p.receipt_number }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-3.5 font-sans text-slate-500">{{ p.payment_date|date:"H:i" }}</td>
+                        <td class="px-6 py-3.5 font-sans font-bold text-slate-900 dark:text-white">{{ p.loan.member.name }}</td>
+                        <td class="px-6 py-3.5 font-sans text-slate-500">{{ p.loan.loan_account_no }}</td>
+                        <td class="px-6 py-3.5 font-sans">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800">
+                                {{ p.get_payment_mode_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3.5 font-sans text-slate-600 dark:text-slate-300">
+                            {{ p.collected_by.get_full_name|default:p.collected_by.username }}
+                        </td>
+                        <td class="px-6 py-3.5 font-bold text-emerald-600 dark:text-emerald-400 text-right text-sm">
+                            ₹{{ p.amount }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center font-sans text-slate-400 text-xs">
+                            No collections recorded on {{ target_date|date:"d M Y" }}.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

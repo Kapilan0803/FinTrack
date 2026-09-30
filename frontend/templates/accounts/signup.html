@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Start Your 30-Day Free Trial - FinTrack{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <a href="{% url 'website:home' %}" class="inline-flex flex-col items-center gap-2.5 mb-4 group">
+            <img src="/static/images/fintrack-icon.png" alt="FinTrack Logo" width="64" height="64" style="width:64px;height:64px;max-width:64px;max-height:64px;object-fit:contain;" class="w-16 h-16 rounded-2xl shadow-2xl shadow-emerald-500/25 group-hover:scale-105 transition-transform object-contain">
+            <span class="font-extrabold text-2xl tracking-tight text-white">Fin<span class="text-emerald-400">Track</span></span>
+        </a>
+        <h2 class="text-2xl font-black text-white">Start Your 30-Day Free Trial</h2>
+        <p class="mt-1 text-xs text-slate-400">No credit card required • Full feature access in 60 seconds</p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4">
+        <div class="bg-slate-950 py-8 px-6 sm:px-10 border border-slate-800 rounded-3xl shadow-2xl">
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ form.company_name.label }}</label>
+                    {{ form.company_name }}
+                    {% if form.company_name.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.company_name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ form.business_phone.label }}</label>
+                        {{ form.business_phone }}
+                        {% if form.business_phone.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.business_phone.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ form.business_email.label }}</label>
+                        {{ form.business_email }}
+                        {% if form.business_email.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.business_email.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ form.full_name.label }}</label>
+                        {{ form.full_name }}
+                        {% if form.full_name.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.full_name.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Create Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}<p class="text-xs text-rose-400 mt-1">{{ form.confirm_password.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm shadow-xl shadow-emerald-500/25 transition-all">
+                        Activate Free Trial &rarr;
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-400 border-t border-slate-800 pt-4">
+                Already registered? <a href="{% url 'accounts:login' %}" class="text-emerald-400 font-bold hover:underline">Log in here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

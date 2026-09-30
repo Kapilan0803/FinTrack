@@ -1,0 +1,11 @@
+<div id="collection-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for inst in installments %}
+        {% include "collections/partials/collection_card.html" with installment=inst %}
+    {% empty %}
+    <div class="col-span-full py-16 text-center bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+        <i data-lucide="check-circle-2" class="w-12 h-12 text-emerald-500 mx-auto mb-3"></i>
+        <h3 class="text-base font-extrabold text-slate-900 dark:text-white">All Caught Up!</h3>
+        <p class="text-xs text-slate-400 mt-1">No pending collections found for this date or route filter.</p>
+    </div>
+    {% endfor %}
+</div>

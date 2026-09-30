@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - FinTrack (DPDP Act Compliant){% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
+    <nav class="bg-slate-900/90 border-b border-slate-800 py-4 px-6">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <a href="{% url 'website:home' %}" class="flex items-center gap-2.5">
+                <img src="/static/images/fintrack-icon.png" alt="FinTrack Logo" class="w-8 h-8 rounded-xl object-contain">
+                <span class="font-extrabold text-lg text-white">FinTrack</span>
+            </a>
+            <a href="{% url 'website:home' %}" class="text-xs font-semibold text-emerald-400 hover:underline">&larr; Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto px-6 py-12 flex-1">
+        <h1 class="text-3xl font-black text-white mb-4">Privacy Policy</h1>
+        <p class="text-xs text-slate-400 mb-8">Effective Date: September 2026 • Compliant with Digital Personal Data Protection (DPDP) Act, 2023</p>
+
+        <div class="space-y-6 text-sm text-slate-300 leading-relaxed">
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">1. Scope and Applicability</h2>
+                <p>FinTrack Technologies ("we", "our", or "us") provides a software-as-a-service platform for finance businesses, NBFCs, and chit funds to manage lending operations. This policy governs how personal data of our users and their borrower clients is processed.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">2. Data We Collect</h2>
+                <p>We process information submitted by registered lending companies, including:</p>
+                <ul class="list-disc pl-5 mt-2 space-y-1 text-slate-400">
+                    <li>Business account information: Business name, owner name, email address, phone number, office address.</li>
+                    <li>Borrower information uploaded by lenders: Name, contact number, KYC document numbers, loan account details, repayment history.</li>
+                    <li>Technical data: IP addresses, access logs, device data for audit logging.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">3. Multi-Tenant Data Isolation</h2>
+                <p>All client data is partitioned using multi-tenant architecture. Your company's borrower records and collection logs are strictly isolated and never shared with or accessible by other companies.</p>
+            </section>
+
+            <section>
+                <h2 class="text-lg font-bold text-white mb-2">4. Rights under the DPDP Act 2023</h2>
+                <p>Data principals are entitled to know what personal data is processed, seek correction or erasure of inaccurate records, and withdraw consent where applicable. Direct all privacy requests to <a href="mailto:privacy@fintrack.in" class="text-emerald-400 underline">privacy@fintrack.in</a>.</p>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Daily Collection Register</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #333333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .company-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #059669;
+        }
+        .title {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            background-color: #059669;
+            color: white;
+            font-size: 8pt;
+            padding: 6px;
+            text-align: left;
+        }
+        td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 6px;
+            font-size: 8pt;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .totals-box {
+            margin-top: 15px;
+            padding: 8px;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company-name">{{ company.name }}</div>
+        <div class="title">Daily Collection Register - {{ target_date|date:"d F Y" }}</div>
+        <div style="font-size: 8pt; color: #666;">Generated on {% now "d M Y H:i" %}</div>
+    </div>
+
+    <div class="totals-box">
+        <strong>Total Collected:</strong> Rs. {{ total_collected }} &nbsp;|&nbsp; 
+        <strong>Cash in Hand:</strong> Rs. {{ cash_total }} &nbsp;|&nbsp; 
+        <strong>UPI:</strong> Rs. {{ upi_total }} &nbsp;|&nbsp; 
+        <strong>Receipts Count:</strong> {{ payments.count }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Receipt #</th>
+                <th>Time</th>
+                <th>Borrower</th>
+                <th>Loan Account</th>
+                <th>Mode</th>
+                <th>Collected By</th>
+                <th class="text-right">Amount (Rs.)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payments %}
+            <tr>
+                <td>{{ p.receipt_number }}</td>
+                <td>{{ p.payment_date|date:"H:i" }}</td>
+                <td>{{ p.loan.member.name }}</td>
+                <td>{{ p.loan.loan_account_no }}</td>
+                <td>{{ p.get_payment_mode_display }}</td>
+                <td>{{ p.collected_by.get_full_name|default:p.collected_by.username }}</td>
+                <td class="text-right bold">Rs. {{ p.amount }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 20px;">No transactions recorded for this day.</td>
+            </tr>
+            {% endfor %}
+            <tr style="background-color: #f9fafb;">
+                <td colspan="6" class="text-right bold" style="padding-top: 8px;">GRAND TOTAL:</td>
+                <td class="text-right bold" style="font-size: 10pt; color: #059669; padding-top: 8px;">Rs. {{ total_collected }}</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

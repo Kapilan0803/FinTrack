@@ -1,0 +1,150 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Groups & Collection Routes{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <!-- Header with Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Groups & Collection Routes</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage Joint Liability Groups (JLG), market routes, door-to-door centers, and assigned collection agents.</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <a href="{% url 'members:member_create' %}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Add Borrower to Group
+            </a>
+        </div>
+    </div>
+
+    <!-- Top KPI Stats Banner -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Total Active Groups</span>
+            <span class="text-2xl font-black text-slate-900 dark:text-white mt-1 block">{{ total_groups }}</span>
+            <span class="text-[10px] text-slate-400 mt-1 block font-semibold">Organized collection routes</span>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-emerald-600 block tracking-wider">Total Customers</span>
+            <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">{{ total_members }}</span>
+            <span class="text-[10px] text-slate-400 mt-1 block font-semibold">Borrowers across all groups</span>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-blue-600 block tracking-wider">Active Loans</span>
+            <span class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 block">{{ total_loans }}</span>
+            <span class="text-[10px] text-slate-400 mt-1 block font-semibold">Disbursed accounts</span>
+        </div>
+
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Portfolio Outstanding</span>
+            <span class="text-2xl font-black text-slate-900 dark:text-white mt-1 block">₹{{ total_outstanding }}</span>
+            <span class="text-[10px] text-emerald-500 mt-1 block font-semibold">Today due: ₹{{ total_today_due }}</span>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+        <form method="GET" class="w-full md:w-96 relative flex items-center">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none"></i>
+            <input type="text" name="q" value="{{ query }}"
+                   placeholder="Search group / route name..."
+                   class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            {% if selected_agent %}
+            <input type="hidden" name="agent" value="{{ selected_agent }}">
+            {% endif %}
+        </form>
+
+        {% if can_manage and agents %}
+        <form method="GET" class="flex items-center gap-2 w-full md:w-auto">
+            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+            <select name="agent" onchange="this.form.submit()"
+                    class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs focus:outline-none">
+                <option value="">All Collection Agents</option>
+                {% for a in agents %}
+                <option value="{{ a.id }}" {% if selected_agent == a.id|stringformat:"s" %}selected{% endif %}>{{ a.get_full_name|default:a.username }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Groups Grid -->
+    {% if groups %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for g in groups %}
+        <div class="rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all p-5 flex flex-col justify-between">
+            <div>
+                <!-- Top Group Header -->
+                <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/60">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                            <i data-lucide="tag" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">{{ g.name }}</h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">
+                                {% if g.agents %}
+                                Agent: {% for a in g.agents %}<span class="font-semibold text-slate-700 dark:text-slate-300">{{ a.get_full_name|default:a.username }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
+                                {% else %}
+                                <span class="text-amber-500 font-semibold">Unassigned Agent</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        {{ g.members_count }} {{ g.members_count|pluralize:"Customer,Customers" }}
+                    </span>
+                </div>
+
+                <!-- Financial Stats -->
+                <div class="grid grid-cols-2 gap-3 py-3.5 border-b border-slate-100 dark:border-slate-800/60 text-xs">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Active Loans</span>
+                        <span class="font-extrabold text-slate-900 dark:text-white text-sm mt-0.5 block">{{ g.active_loans_count }} loans</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Outstanding</span>
+                        <span class="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5 block">₹{{ g.total_outstanding }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Today Due</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 mt-0.5 block">₹{{ g.today_due }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Collected Today</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">₹{{ g.today_collected }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-4 flex items-center gap-2">
+                <a href="{% url 'collections:today' %}?route={{ g.name|urlencode }}"
+                   class="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/20 transition-all">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i> Today's Sheet
+                </a>
+                <a href="{% url 'members:member_list' %}?route={{ g.name|urlencode }}"
+                   class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                   title="View Customers in this Group">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="p-12 text-center rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto mb-3">
+            <i data-lucide="tag" class="w-6 h-6"></i>
+        </div>
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">No groups or routes found</h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Borrowers with route or group names assigned will automatically appear here with their aggregated portfolio metrics.</p>
+        <a href="{% url 'members:member_create' %}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add First Borrower with Route
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

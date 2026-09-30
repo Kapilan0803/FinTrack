@@ -1,0 +1,504 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Collections Hub & Field Register{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <!-- Top Stats Banner -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- Target Due -->
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">Today's Target</span>
+            <span class="text-xl font-black text-slate-900 dark:text-white mt-1 block">₹{{ total_expected_today }}</span>
+            <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+                <div class="bg-emerald-500 h-full rounded-full transition-all" style="width: {{ completion_rate }}%"></div>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 block font-semibold">{{ completion_rate }}% target met</span>
+        </div>
+
+        <!-- Collected Today -->
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-emerald-600 block tracking-wider">Collected Today</span>
+            <span class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">₹{{ total_collected_today }}</span>
+            {% if penalties_collected > 0 %}
+            <span class="text-[10px] text-emerald-600 mt-1 block font-semibold">+₹{{ penalties_collected }} penalty incl.</span>
+            {% else %}
+            <span class="text-[10px] text-slate-400 mt-1 block font-semibold">UPI: ₹{{ upi_collected }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Cash in Hand & Denomination Reconciler -->
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+            <div>
+                <span class="text-[10px] font-bold uppercase text-blue-600 block tracking-wider">Cash in Hand</span>
+                <span class="text-xl font-black text-blue-600 dark:text-blue-400 mt-1 block">₹{{ cash_in_hand }}</span>
+            </div>
+            <button type="button" onclick="openCashDrawerModal()" class="mt-2 w-full py-1.5 px-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors">
+                <i data-lucide="calculator" class="w-3 h-3"></i>
+                <span>{% if today_closing %}Tally ({{ today_closing.get_status_display }}){% else %}Count & Day Close{% endif %}</span>
+            </button>
+        </div>
+
+        <!-- Critical Overdue -->
+        <div class="p-4 rounded-3xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <span class="text-[10px] font-bold uppercase text-rose-500 block tracking-wider">Critical Overdue</span>
+            <span class="text-xl font-black text-rose-500 mt-1 block">{{ overdue_count }} EMIs</span>
+            <span class="text-[10px] text-rose-400 mt-1 block font-semibold">+₹{{ total_penalties_pending }} fees pending</span>
+        </div>
+    </div>
+
+    <!-- Loan Product Tabs (RupeeCollect Style) -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800 no-scrollbar">
+        <a href="?loan_type=all&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'ALL' %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>All Sheets</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'ALL' %}bg-white/20 text-white dark:bg-slate-900/20 dark:text-slate-900{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.ALL }}</span>
+        </a>
+
+        <a href="?loan_type=DAILY&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'DAILY' %}bg-emerald-600 text-white shadow-sm shadow-emerald-600/30{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>Daily Collection</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'DAILY' %}bg-white/20 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.DAILY }}</span>
+        </a>
+
+        <a href="?loan_type=WEEKLY&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'WEEKLY' %}bg-blue-600 text-white shadow-sm shadow-blue-600/30{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>Weekly Collection</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'WEEKLY' %}bg-white/20 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.WEEKLY }}</span>
+        </a>
+
+        <a href="?loan_type=MONTHLY_EMI&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'MONTHLY_EMI' %}bg-indigo-600 text-white shadow-sm shadow-indigo-600/30{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>Monthly EMI</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'MONTHLY_EMI' %}bg-white/20 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.MONTHLY_EMI }}</span>
+        </a>
+
+        <a href="?loan_type=MONTHLY_INTEREST&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'MONTHLY_INTEREST' %}bg-amber-600 text-white shadow-sm shadow-amber-600/30{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>Monthly Interest</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'MONTHLY_INTEREST' %}bg-white/20 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.MONTHLY_INTEREST }}</span>
+        </a>
+
+        <a href="?loan_type=WEEKLY_INTEREST&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+           class="px-4 py-2 rounded-2xl text-xs font-extrabold whitespace-nowrap transition-all flex items-center gap-1.5 {% if selected_loan_type == 'WEEKLY_INTEREST' %}bg-violet-600 text-white shadow-sm shadow-violet-600/30{% else %}bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200{% endif %}">
+            <span>Weekly Interest</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] {% if selected_loan_type == 'WEEKLY_INTEREST' %}bg-white/20 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300{% endif %}">{{ tab_counts.WEEKLY_INTEREST }}</span>
+        </a>
+    </div>
+
+    <!-- Filter & Walk-Order Controls -->
+    <div class="p-4 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row gap-3 items-center justify-between">
+        <!-- Date Selector, Status, Sort & Route Filters -->
+        <form method="GET" class="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+            <input type="hidden" name="loan_type" value="{{ selected_loan_type }}">
+
+            <!-- Date Picker -->
+            <input type="date" name="date" value="{{ target_date|date:'Y-m-d' }}" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+
+            <!-- Route / Walk-Order Sequence Sort -->
+            <select name="sort" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                <option value="walk_order" {% if selected_sort == 'walk_order' %}selected{% endif %}>🚶 Walk Order (Door-to-Door)</option>
+                <option value="due_date" {% if selected_sort == 'due_date' %}selected{% endif %}>📅 Due Date</option>
+                <option value="amount_desc" {% if selected_sort == 'amount_desc' %}selected{% endif %}>💰 Highest Due First</option>
+                <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>👤 Member Name</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select name="status" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All (Today + Overdue)</option>
+                <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Due / Pending Only</option>
+                <option value="overdue" {% if selected_status == 'overdue' %}selected{% endif %}>Critical Overdue Only</option>
+                <option value="missed" {% if selected_status == 'missed' %}selected{% endif %}>Missed Attempts Only</option>
+                <option value="paid" {% if selected_status == 'paid' %}selected{% endif %}>Collected Today</option>
+            </select>
+
+            <!-- Route Filter -->
+            {% if routes %}
+            <select name="route" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                <option value="">All Routes</option>
+                {% for r in routes %}
+                <option value="{{ r }}" {% if selected_route == r %}selected{% endif %}>{{ r }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
+            <!-- Agent Filter (Manager View) -->
+            {% if can_manage and agents %}
+            <select name="agent" onchange="this.form.submit()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none">
+                <option value="">All Field Agents</option>
+                {% for a in agents %}
+                <option value="{{ a.id }}" {% if selected_agent == a.id|stringformat:"s" %}selected{% endif %}>{{ a.get_full_name|default:a.username }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </form>
+
+        <!-- Search Box -->
+        <div class="w-full lg:w-72 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none"></i>
+            <input type="text" name="q" value="{{ query }}"
+                   placeholder="Search borrower, stall, phone..."
+                   hx-get="{% url 'collections:today' %}?only_cards=1&loan_type={{ selected_loan_type }}&date={{ target_date|date:'Y-m-d' }}&status={{ selected_status }}&route={{ selected_route }}&agent={{ selected_agent }}&sort={{ selected_sort }}"
+                   hx-trigger="keyup changed delay:300ms, search"
+                   hx-target="#collection-cards-container"
+                   hx-swap="outerHTML"
+                   class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+    </div>
+
+    <!-- Cards Container -->
+    {% include "collections/partials/cards_container.html" %}
+
+    <!-- 1. CUSTOM / UPI / PENALTY PAYMENT MODAL -->
+    <div id="paymentModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Record Payment</h3>
+                <button type="button" onclick="closePaymentModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="customPayForm" method="POST" action="">
+                {% csrf_token %}
+                <input type="hidden" name="installment_id" id="modal_inst_id">
+                
+                <p class="text-xs text-slate-500 mb-3">Borrower: <strong id="modal_borrower_name" class="text-slate-900 dark:text-white"></strong></p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Installment Amount (₹) *</label>
+                        <input type="number" step="0.01" name="amount" id="modal_amount" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-black text-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+
+                    <!-- Late Penalty Options Container -->
+                    <div id="modal_penalty_container" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-rose-700 dark:text-rose-400">Late Penalty Fee Accrued</span>
+                            <span class="font-black text-rose-700 dark:text-rose-400" id="modal_penalty_text">₹0.00</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <label class="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
+                                <input type="radio" name="penalty_action" value="collect" checked onchange="togglePenaltyInputs()"> Collect Fee
+                            </label>
+                            <label class="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
+                                <input type="radio" name="penalty_action" value="waive" onchange="togglePenaltyInputs()"> Waive Fee
+                            </label>
+                        </div>
+                        <input type="hidden" name="penalty_collected" id="modal_penalty_collected" value="0.00">
+                        <input type="hidden" name="penalty_waived" id="modal_penalty_waived" value="0.00">
+                        <div id="modal_waiver_reason_box" class="hidden">
+                            <input type="text" name="waiver_reason" placeholder="Reason for waiving late fee..." class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Mode *</label>
+                        <select name="payment_mode" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:outline-none">
+                            <option value="CASH">Cash</option>
+                            <option value="UPI">UPI / QR Code</option>
+                            <option value="BANK_TRANSFER">Bank Transfer / IMPS</option>
+                            <option value="CHEQUE">Cheque</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Reference / UTR Number (Optional)</label>
+                        <input type="text" name="reference_number" placeholder="e.g. UPI Ref / Cheque No" class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Notes (Optional)</label>
+                        <textarea name="notes" rows="2" placeholder="e.g. Paid in 2 installments" class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-4">
+                    <button type="button" onclick="closePaymentModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-md shadow-emerald-600/30">Confirm Payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MARK MISSED / VISIT ATTEMPT MODAL -->
+    <div id="missedModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="clock" class="w-5 h-5 text-amber-500"></i> Record Missed Visit
+                </h3>
+                <button type="button" onclick="closeMissedModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="missedVisitForm" method="POST" action="">
+                {% csrf_token %}
+                <p class="text-xs text-slate-500 mb-3">Borrower: <strong id="missed_borrower_name" class="text-slate-900 dark:text-white"></strong></p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Reason for Non-Payment *</label>
+                        <select name="reason" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:outline-none">
+                            <option value="SHOP_CLOSED">Shop / Stall Closed</option>
+                            <option value="NOT_AVAILABLE">Customer Not Available / Out of Station</option>
+                            <option value="PROMISED_LATER">Customer Promised to Pay Later</option>
+                            <option value="INSUFFICIENT_FUNDS">Cash Shortage / Arranging Funds</option>
+                            <option value="DISPUTE">Dispute / Customer Refused</option>
+                            <option value="OTHER">Other Reason</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Promised Follow-up Date (Optional)</label>
+                        <input type="date" name="promised_date" class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Agent Visit Remarks</label>
+                        <textarea name="notes" rows="2" placeholder="e.g. Visited at 11 AM, neighbour said borrower will be back tomorrow" class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-4">
+                    <button type="button" onclick="closeMissedModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs shadow-md shadow-amber-600/30">Log Visit Attempt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. INTEREST LOAN PRINCIPAL SETTLEMENT MODAL -->
+    <div id="principalModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                    <i data-lucide="wallet" class="w-5 h-5 text-violet-500"></i> Settle Principal & Close Loan
+                </h3>
+                <button type="button" onclick="closePrincipalModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="principalForm" method="POST" action="">
+                {% csrf_token %}
+                <p class="text-xs text-slate-500 mb-3">Borrower: <strong id="principal_borrower_name" class="text-slate-900 dark:text-white"></strong></p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Principal Amount (₹) *</label>
+                        <input type="number" step="0.01" name="amount" id="principal_amount_input" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-black text-lg focus:ring-2 focus:ring-violet-500 focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Payment Mode *</label>
+                        <select name="payment_mode" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs font-bold focus:outline-none">
+                            <option value="CASH">Cash</option>
+                            <option value="UPI">UPI / QR Code</option>
+                            <option value="BANK_TRANSFER">Bank Transfer / IMPS</option>
+                            <option value="CHEQUE">Cheque</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Reference Number</label>
+                        <input type="text" name="reference_number" placeholder="Optional" class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-4">
+                    <button type="button" onclick="closePrincipalModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-xs shadow-md shadow-violet-600/30">Close & Collect Principal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. CASH DRAWER & DENOMINATION CLOSING MODAL -->
+    <div id="cashDrawerModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-navy-900 rounded-3xl max-w-lg w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="calculator" class="w-5 h-5 text-blue-500"></i> Cash Denomination & Day Closing
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Tally your physical cash bag against system collections</p>
+                </div>
+                <button type="button" onclick="closeCashDrawerModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form method="POST" action="{% url 'collections:cash_closing' %}">
+                {% csrf_token %}
+                <input type="hidden" name="closing_date" value="{{ target_date|date:'Y-m-d' }}">
+
+                <!-- Denomination Counter Grid -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹500 ×</span>
+                        <input type="number" min="0" name="count_500" id="n500" value="{{ today_closing.count_500|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹200 ×</span>
+                        <input type="number" min="0" name="count_200" id="n200" value="{{ today_closing.count_200|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹100 ×</span>
+                        <input type="number" min="0" name="count_100" id="n100" value="{{ today_closing.count_100|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹50 ×</span>
+                        <input type="number" min="0" name="count_50" id="n50" value="{{ today_closing.count_50|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹20 ×</span>
+                        <input type="number" min="0" name="count_20" id="n20" value="{{ today_closing.count_20|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">₹10 ×</span>
+                        <input type="number" min="0" name="count_10" id="n10" value="{{ today_closing.count_10|default:0 }}" oninput="recalcCashDrawer()" class="w-20 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                    <div class="col-span-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">Coins Total (₹)</span>
+                        <input type="number" step="0.01" min="0" name="count_coins" id="ncoins" value="{{ today_closing.count_coins|default:'0.00' }}" oninput="recalcCashDrawer()" class="w-28 px-2 py-1 text-right font-black rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Live Balance & Reconciliation Box -->
+                <div class="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2 mt-4 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">System Cash Collected:</span>
+                        <span class="font-bold text-slate-900 dark:text-white" id="systemCashDisplay">₹{{ cash_in_hand }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500">Total Counted Physical Cash:</span>
+                        <span class="font-black text-blue-600 dark:text-blue-400 text-sm" id="countedCashDisplay">₹0.00</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">Discrepancy / Variance:</span>
+                        <span class="font-black px-2 py-0.5 rounded-full text-xs" id="varianceBadge">₹0.00 (Balanced)</span>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <textarea name="remarks" rows="2" placeholder="Handover notes or reasons for excess/shortage..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none">{{ today_closing.remarks|default:'' }}</textarea>
+                </div>
+
+                <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 mt-4">
+                    <button type="button" onclick="closeCashDrawerModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-600/30">Submit Day Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Payment Modal Logic
+    let currentPenaltyAmount = 0;
+
+    function openPaymentModal(loanId, instId, borrowerName, amount, penaltyAmount) {
+        document.getElementById('customPayForm').action = "/collections/custom-pay/" + loanId + "/";
+        document.getElementById('modal_inst_id').value = instId;
+        document.getElementById('modal_borrower_name').textContent = borrowerName;
+        document.getElementById('modal_amount').value = amount;
+
+        currentPenaltyAmount = parseFloat(penaltyAmount || 0);
+        const penaltyContainer = document.getElementById('modal_penalty_container');
+        if (currentPenaltyAmount > 0) {
+            penaltyContainer.classList.remove('hidden');
+            document.getElementById('modal_penalty_text').textContent = '₹' + currentPenaltyAmount.toFixed(2);
+            document.getElementById('modal_penalty_collected').value = currentPenaltyAmount.toFixed(2);
+            document.getElementById('modal_penalty_waived').value = '0.00';
+        } else {
+            penaltyContainer.classList.add('hidden');
+            document.getElementById('modal_penalty_collected').value = '0.00';
+            document.getElementById('modal_penalty_waived').value = '0.00';
+        }
+
+        document.getElementById('paymentModal').classList.remove('hidden');
+    }
+
+    function togglePenaltyInputs() {
+        const action = document.querySelector('input[name="penalty_action"]:checked').value;
+        const waiverBox = document.getElementById('modal_waiver_reason_box');
+        if (action === 'waive') {
+            document.getElementById('modal_penalty_collected').value = '0.00';
+            document.getElementById('modal_penalty_waived').value = currentPenaltyAmount.toFixed(2);
+            waiverBox.classList.remove('hidden');
+        } else {
+            document.getElementById('modal_penalty_collected').value = currentPenaltyAmount.toFixed(2);
+            document.getElementById('modal_penalty_waived').value = '0.00';
+            waiverBox.classList.add('hidden');
+        }
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+    }
+
+    // 2. Missed Visit Modal Logic
+    function openMissedModal(instId, borrowerName) {
+        document.getElementById('missedVisitForm').action = "/collections/mark-missed/" + instId + "/";
+        document.getElementById('missed_borrower_name').textContent = borrowerName;
+        document.getElementById('missedModal').classList.remove('hidden');
+    }
+
+    function closeMissedModal() {
+        document.getElementById('missedModal').classList.add('hidden');
+    }
+
+    // 3. Principal Settle Modal Logic
+    function openPrincipalSettleModal(loanId, borrowerName, principalAmount) {
+        document.getElementById('principalForm').action = "/collections/settle-principal/" + loanId + "/";
+        document.getElementById('principal_borrower_name').textContent = borrowerName;
+        document.getElementById('principal_amount_input').value = principalAmount;
+        document.getElementById('principalModal').classList.remove('hidden');
+    }
+
+    function closePrincipalModal() {
+        document.getElementById('principalModal').classList.add('hidden');
+    }
+
+    // 4. Cash Drawer & Denomination Reconciler Logic
+    const SYSTEM_CASH = parseFloat("{{ cash_in_hand|default:'0.00' }}");
+
+    function openCashDrawerModal() {
+        recalcCashDrawer();
+        document.getElementById('cashDrawerModal').classList.remove('hidden');
+    }
+
+    function closeCashDrawerModal() {
+        document.getElementById('cashDrawerModal').classList.add('hidden');
+    }
+
+    function recalcCashDrawer() {
+        const n500 = (parseInt(document.getElementById('n500').value) || 0) * 500;
+        const n200 = (parseInt(document.getElementById('n200').value) || 0) * 200;
+        const n100 = (parseInt(document.getElementById('n100').value) || 0) * 100;
+        const n50 = (parseInt(document.getElementById('n50').value) || 0) * 50;
+        const n20 = (parseInt(document.getElementById('n20').value) || 0) * 20;
+        const n10 = (parseInt(document.getElementById('n10').value) || 0) * 10;
+        const coins = parseFloat(document.getElementById('ncoins').value) || 0.00;
+
+        const totalCounted = n500 + n200 + n100 + n50 + n20 + n10 + coins;
+        document.getElementById('countedCashDisplay').textContent = '₹' + totalCounted.toFixed(2);
+
+        const diff = totalCounted - SYSTEM_CASH;
+        const badge = document.getElementById('varianceBadge');
+
+        if (Math.abs(diff) < 0.01) {
+            badge.textContent = '₹0.00 (Balanced)';
+            badge.className = 'font-black px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+        } else if (diff > 0) {
+            badge.textContent = '+₹' + diff.toFixed(2) + ' (Excess)';
+            badge.className = 'font-black px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+        } else {
+            badge.textContent = '-₹' + Math.abs(diff).toFixed(2) + ' (Shortage)';
+            badge.className = 'font-black px-2 py-0.5 rounded-full text-xs bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+        }
+    }
+</script>
+{% endblock %}

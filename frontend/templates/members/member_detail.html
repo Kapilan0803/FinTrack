@@ -1,0 +1,96 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Borrower Profile & Ledger{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <!-- Top Borrower Card -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 font-black text-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
+                {{ member.name|make_list|first|upper }}
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white">{{ member.name }}</h2>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {{ member.member_code }}
+                    </span>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap gap-4">
+                    <span><i data-lucide="phone" class="w-3.5 h-3.5 inline text-emerald-600"></i> {{ member.phone }}</span>
+                    <span><i data-lucide="map-pin" class="w-3.5 h-3.5 inline text-emerald-600"></i> {{ member.area_or_route|default:"General Route" }}, {{ member.city }}</span>
+                    <span><i data-lucide="shield" class="w-3.5 h-3.5 inline text-emerald-600"></i> {{ member.get_id_proof_type_display }}: {{ member.id_proof_number|default:"-" }}</span>
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{% url 'loans:loan_create' %}?member={{ member.pk }}" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all">
+                + Issue New Loan
+            </a>
+            <a href="{% url 'members:member_edit' member.pk %}" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-all">
+                Edit KYC
+            </a>
+        </div>
+    </div>
+
+    <!-- Ledger Totals -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-slate-400">Total Borrowed</p>
+            <p class="text-xl font-black text-slate-900 dark:text-white mt-1">₹{{ summary.total_disbursed }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-slate-400">Total Repayable</p>
+            <p class="text-xl font-black text-slate-900 dark:text-white mt-1">₹{{ summary.total_repayable }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-emerald-600">Total Paid Back</p>
+            <p class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">₹{{ summary.total_collected }}</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white dark:bg-navy-900 border border-slate-200 dark:border-slate-800">
+            <p class="text-[10px] font-bold uppercase text-rose-500">Current Outstanding</p>
+            <p class="text-xl font-black text-rose-500 mt-1">₹{{ summary.total_balance }}</p>
+        </div>
+    </div>
+
+    <!-- Loans History & Schedules -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
+        <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-4">Loan Accounts ({{ loans.count }})</h3>
+        
+        <div class="space-y-4">
+            {% for l in loans %}
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <a href="{% url 'loans:loan_detail' l.pk %}" class="font-extrabold text-sm text-slate-900 dark:text-white hover:text-emerald-600">
+                            {{ l.loan_account_no }}
+                        </a>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black {% if l.status == 'ACTIVE' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400{% else %}bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300{% endif %}">
+                            {{ l.status }}
+                        </span>
+                        <span class="text-xs text-slate-400">({{ l.get_loan_type_display }})</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Principal: ₹{{ l.principal_amount }} • Total: ₹{{ l.total_amount }} • {{ l.number_of_installments }} EMIs @ ₹{{ l.installment_amount }}
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-900 dark:text-white">Paid: ₹{{ l.total_paid }}</p>
+                        <p class="text-[11px] text-rose-500 font-bold">Balance: ₹{{ l.outstanding_balance }}</p>
+                    </div>
+                    <a href="{% url 'loans:loan_detail' l.pk %}" class="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-100">
+                        View Schedule &rarr;
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-xs text-slate-400 text-center py-4">No loans issued to this borrower yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

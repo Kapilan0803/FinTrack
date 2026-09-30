@@ -1,0 +1,174 @@
+<div id="card-{{ installment.id }}" class="p-5 rounded-3xl border transition-all duration-300 {% if installment.status == 'PAID' or just_paid %}bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-800/80 shadow-emerald-500/10{% elif installment.status == 'OVERDUE' %}bg-white dark:bg-navy-900 border-rose-300 dark:border-rose-900/60 shadow-sm{% else %}bg-white dark:bg-navy-900 border-slate-200 dark:border-slate-800 shadow-sm hover:border-emerald-500/40{% endif %}">
+    
+    <!-- Top Row: Route Walk Order, Member & Status -->
+    <div class="flex items-start justify-between gap-3 mb-3">
+        <div class="flex items-start gap-3 min-w-0">
+            <!-- Walk Order Badge & Avatar -->
+            <div class="relative flex-shrink-0">
+                <div class="w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm {% if installment.status == 'PAID' or just_paid %}bg-emerald-600 text-white{% elif installment.status == 'OVERDUE' %}bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900{% else %}bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400{% endif %}">
+                    {{ installment.loan.member.name|make_list|first|upper }}
+                </div>
+                {% if installment.loan.member.visit_order > 0 %}
+                <span class="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow" title="Route Walk Order">
+                    #{{ installment.loan.member.visit_order }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <a href="{% url 'members:member_detail' installment.loan.member.pk %}" class="font-extrabold text-sm text-slate-900 dark:text-white truncate block hover:text-emerald-600">
+                        {{ installment.loan.member.name }}
+                    </a>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 flex items-center gap-1">
+                    <span>{{ installment.loan.member.area_or_route|default:"Route" }}</span>
+                    <span>•</span>
+                    <a href="tel:{{ installment.loan.member.phone }}" class="hover:underline font-mono text-[11px]">{{ installment.loan.member.phone }}</a>
+                </p>
+                {% if installment.loan.member.landmark %}
+                <p class="text-[11px] text-amber-600 dark:text-amber-400 truncate mt-0.5 flex items-center gap-1">
+                    <i data-lucide="map-pin" class="w-3 h-3 flex-shrink-0"></i>
+                    <span>{{ installment.loan.member.landmark }}</span>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex flex-col items-end gap-1 flex-shrink-0">
+            {% if installment.status == 'PAID' or just_paid %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black bg-emerald-600 text-white shadow-sm shadow-emerald-600/30">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> PAID
+            </span>
+            {% elif installment.status == 'OVERDUE' %}
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-900">
+                <i data-lucide="alert-circle" class="w-3 h-3"></i> OVERDUE
+            </span>
+            {% elif installment.status == 'PARTIALLY_PAID' %}
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200">
+                PARTIAL
+            </span>
+            {% else %}
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                DUE TODAY
+            </span>
+            {% endif %}
+
+            <!-- GPS Navigation Icon Link -->
+            {% if installment.loan.navigation_url %}
+            <a href="{{ installment.loan.navigation_url }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline mt-0.5" title="Open Google Maps Route">
+                <i data-lucide="navigation" class="w-3 h-3"></i> Maps
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Loan Info & Amounts Bar -->
+    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 mb-3 flex items-center justify-between text-xs">
+        <div>
+            <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Installment & Type</span>
+            <span class="font-extrabold text-slate-800 dark:text-slate-200 block">
+                #{{ installment.installment_number }} of {{ installment.loan.number_of_installments }}
+            </span>
+            <span class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                {{ installment.loan.get_loan_type_display }}
+            </span>
+        </div>
+        <div class="text-right">
+            <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">Due Amount</span>
+            <span class="text-base font-black {% if installment.status == 'PAID' or just_paid %}text-emerald-600 dark:text-emerald-400{% else %}text-slate-900 dark:text-white{% endif %} block">
+                ₹{% if installment.status == 'PAID' or just_paid %}{{ installment.expected_amount }}{% else %}{{ installment.pending_amount }}{% endif %}
+            </span>
+            <span class="text-[10px] text-slate-400">Bal: ₹{{ installment.loan.outstanding_balance }}</span>
+        </div>
+    </div>
+
+    <!-- Late Penalty Tag (if Overdue and penalty > 0) -->
+    {% if installment.penalty_amount > 0 and installment.status != 'PAID' and not just_paid %}
+    <div class="mb-3 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-center justify-between text-xs">
+        <span class="text-rose-700 dark:text-rose-400 font-bold flex items-center gap-1.5">
+            <i data-lucide="triangle-alert" class="w-3.5 h-3.5"></i> Late Penalty Fee
+        </span>
+        <span class="font-black text-rose-700 dark:text-rose-400">+₹{{ installment.penalty_amount }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Missed Visit Outcome Badge (if logged today) -->
+    {% if installment.today_attempt or just_missed %}
+    <div class="mb-3 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs">
+        <div class="flex items-center justify-between font-bold text-amber-800 dark:text-amber-300">
+            <span class="flex items-center gap-1">
+                <i data-lucide="clock-alert" class="w-3.5 h-3.5"></i> Visit Attempt: {{ installment.today_attempt.get_reason_display|default:"Promised Later" }}
+            </span>
+        </div>
+        {% if installment.today_attempt.promised_date %}
+        <p class="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">
+            Promised on: <strong>{{ installment.today_attempt.promised_date|date:"d M Y" }}</strong>
+        </p>
+        {% endif %}
+        {% if installment.today_attempt.notes %}
+        <p class="text-[10px] text-amber-600 dark:text-amber-500 italic mt-0.5">"{{ installment.today_attempt.notes }}"</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Interest-Only Loan Buyout Callout -->
+    {% if installment.loan.is_interest_only and installment.status != 'PAID' and not just_paid %}
+    <div class="mb-3 px-3 py-2 rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-900/60 flex items-center justify-between text-xs">
+        <div>
+            <span class="font-bold text-violet-800 dark:text-violet-300 block">Interest-Only Loan</span>
+            <span class="text-[10px] text-violet-600 dark:text-violet-400">Principal Due: ₹{{ installment.loan.outstanding_balance }}</span>
+        </div>
+        <button type="button" onclick="openPrincipalSettleModal('{{ installment.loan.id }}', '{{ installment.loan.member.name|escapejs }}', '{{ installment.loan.outstanding_balance }}')" class="px-2.5 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-bold text-[11px] transition-colors">
+            Settle Principal
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Actions Area -->
+    {% if installment.status == 'PAID' or just_paid %}
+    <div class="flex items-center gap-2 pt-1">
+        {% if latest_payment %}
+        <a href="{% url 'collections:receipt' latest_payment.receipt_number %}" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
+            <i data-lucide="printer" class="w-4 h-4"></i> Thermal Receipt
+        </a>
+        <a href="https://api.whatsapp.com/send?phone=91{{ installment.loan.member.phone }}&text=Dear%20{{ installment.loan.member.name }}%2C%20received%20payment%20of%20Rs.{{ installment.expected_amount }}%20for%20Loan%20{{ installment.loan.loan_account_no }}." target="_blank" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+        </a>
+        {% else %}
+        <span class="w-full text-center py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+            ✓ Collected on {{ installment.paid_date|default:"Today" }}
+        </span>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="space-y-2">
+        <!-- 1-TAP QUICK PAY BUTTON -->
+        <form hx-post="{% url 'collections:quick_pay' installment.id %}" hx-target="#card-{{ installment.id }}" hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="payment_mode" value="CASH">
+            {% if installment.penalty_amount > 0 %}
+            <input type="hidden" name="collect_penalty" value="1">
+            {% endif %}
+            <button type="submit" class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all">
+                <i data-lucide="check" class="w-5 h-5"></i>
+                <span>Collect ₹{% if installment.penalty_amount > 0 %}{{ installment.pending_amount|add:installment.penalty_amount }} (Cash + Fee){% else %}{{ installment.pending_amount }} (Cash 1-Tap){% endif %}</span>
+            </button>
+        </form>
+
+        <div class="grid grid-cols-2 gap-2">
+            <!-- UPI / Custom / Partial Payment Modal Trigger -->
+            <button type="button" onclick="openPaymentModal('{{ installment.loan.id }}', '{{ installment.id }}', '{{ installment.loan.member.name|escapejs }}', '{{ installment.pending_amount }}', '{{ installment.penalty_amount }}')" class="py-2.5 px-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                <i data-lucide="qr-code" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span class="truncate">UPI / Custom</span>
+            </button>
+
+            <!-- Mark Missed / Visit Outcome Trigger -->
+            <button type="button" onclick="openMissedModal('{{ installment.id }}', '{{ installment.loan.member.name|escapejs }}')" class="py-2.5 px-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span class="truncate">Mark Missed</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>

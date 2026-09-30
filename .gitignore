@@ -1,0 +1,55 @@
+# FinTrack - Git Ignore Rules
+
+# 1. Environment & Secrets (NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+*.env
+!*.env.example
+
+# 2. Database & Local Data (NEVER COMMIT)
+*.sqlite3
+db.sqlite3
+*.db
+
+# 3. Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 4. Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# 5. Django Media & Static Uploads (User uploads / PII)
+media/
+staticfiles/
+
+# 6. Celery / Background Task State
+celerybeat-schedule
+celerybeat.pid
+*.pid
+
+# 7. IDE & Editor Specific Files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 8. Logs
+*.log
+logs/

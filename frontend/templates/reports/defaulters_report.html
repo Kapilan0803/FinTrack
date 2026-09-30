@@ -1,0 +1,150 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Overdue Defaulters & Risk Aging{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Overdue Defaulters & Aging Analysis</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Categorized by days overdue: 1-7 days, 8-30 days, and 30+ days.</p>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex items-center gap-4">
+            <div>
+                <span class="text-[10px] font-bold uppercase text-rose-500 block">Total At Risk</span>
+                <span class="text-xl font-black text-rose-600 dark:text-rose-400">₹{{ total_overdue }}</span>
+            </div>
+            <div class="border-l border-rose-200 dark:border-rose-900 pl-4">
+                <span class="text-[10px] font-bold uppercase text-rose-500 block">Overdue Count</span>
+                <span class="text-xl font-black text-rose-600 dark:text-rose-400">{{ overdue_count }} EMIs</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Critical: 30+ Days Overdue -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-rose-200 dark:border-rose-900/60 overflow-hidden shadow-sm">
+        <div class="p-5 bg-rose-50/60 dark:bg-rose-950/40 border-b border-rose-200 dark:border-rose-900/60 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-600 animate-pulse"></span>
+                <h3 class="font-extrabold text-sm text-rose-900 dark:text-rose-300">Severe Risk (30+ Days Overdue)</h3>
+            </div>
+            <span class="text-xs font-bold text-rose-700 dark:text-rose-400">{{ bracket_30_plus|length }} accounts</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold uppercase text-slate-400">
+                    <tr>
+                        <th class="px-6 py-3">Borrower</th>
+                        <th class="px-6 py-3">Loan Account</th>
+                        <th class="px-6 py-3">Due Date</th>
+                        <th class="px-6 py-3">Days Past Due</th>
+                        <th class="px-6 py-3">Pending Amount</th>
+                        <th class="px-6 py-3">Agent</th>
+                        <th class="px-6 py-3 text-right">Quick Contact</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    {% for inst in bracket_30_plus %}
+                    <tr>
+                        <td class="px-6 py-3.5 font-bold text-slate-900 dark:text-white">{{ inst.loan.member.name }}</td>
+                        <td class="px-6 py-3.5 font-mono text-slate-500">{{ inst.loan.loan_account_no }}</td>
+                        <td class="px-6 py-3.5 text-slate-600 dark:text-slate-300">{{ inst.due_date|date:"d M Y" }}</td>
+                        <td class="px-6 py-3.5 font-bold text-rose-600">{{ inst.days_overdue }} days</td>
+                        <td class="px-6 py-3.5 font-black text-rose-600">₹{{ inst.pending_amount }}</td>
+                        <td class="px-6 py-3.5 text-slate-500">{{ inst.loan.assigned_agent.get_full_name|default:"Unassigned" }}</td>
+                        <td class="px-6 py-3.5 text-right">
+                            <a href="tel:{{ inst.loan.member.phone }}" class="text-xs font-bold text-emerald-600 hover:underline mr-2">Call</a>
+                            <a href="https://api.whatsapp.com/send?phone=91{{ inst.loan.member.phone }}&text=Dear%20{{ inst.loan.member.name }}%2C%20your%20EMI%20of%20Rs.{{ inst.pending_amount }}%20is%20overdue%20by%20{{ inst.days_overdue }}%20days." target="_blank" class="text-xs font-bold text-emerald-600 hover:underline">WhatsApp</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-6 text-center text-slate-400 text-xs">No accounts in 30+ days overdue bracket.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. Moderate: 8-30 Days Overdue -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-amber-200 dark:border-amber-900/60 overflow-hidden shadow-sm">
+        <div class="p-5 bg-amber-50/60 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/60 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                <h3 class="font-extrabold text-sm text-amber-900 dark:text-amber-300">Moderate Risk (8 - 30 Days Overdue)</h3>
+            </div>
+            <span class="text-xs font-bold text-amber-700 dark:text-amber-400">{{ bracket_8_30|length }} accounts</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold uppercase text-slate-400">
+                    <tr>
+                        <th class="px-6 py-3">Borrower</th>
+                        <th class="px-6 py-3">Loan Account</th>
+                        <th class="px-6 py-3">Due Date</th>
+                        <th class="px-6 py-3">Days Past Due</th>
+                        <th class="px-6 py-3">Pending Amount</th>
+                        <th class="px-6 py-3">Agent</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    {% for inst in bracket_8_30 %}
+                    <tr>
+                        <td class="px-6 py-3 font-bold text-slate-900 dark:text-white">{{ inst.loan.member.name }}</td>
+                        <td class="px-6 py-3 font-mono text-slate-500">{{ inst.loan.loan_account_no }}</td>
+                        <td class="px-6 py-3 text-slate-600 dark:text-slate-300">{{ inst.due_date|date:"d M Y" }}</td>
+                        <td class="px-6 py-3 font-bold text-amber-600">{{ inst.days_overdue }} days</td>
+                        <td class="px-6 py-3 font-bold text-slate-900 dark:text-white">₹{{ inst.pending_amount }}</td>
+                        <td class="px-6 py-3 text-slate-500">{{ inst.loan.assigned_agent.get_full_name|default:"Unassigned" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-6 text-center text-slate-400 text-xs">No accounts in 8-30 days overdue bracket.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. Early: 1-7 Days Overdue -->
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Early Follow-Up (1 - 7 Days Overdue)</h3>
+            </div>
+            <span class="text-xs font-bold text-slate-500">{{ bracket_1_7|length }} accounts</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 text-[11px] font-bold uppercase text-slate-400">
+                    <tr>
+                        <th class="px-6 py-3">Borrower</th>
+                        <th class="px-6 py-3">Loan Account</th>
+                        <th class="px-6 py-3">Due Date</th>
+                        <th class="px-6 py-3">Pending Amount</th>
+                        <th class="px-6 py-3">Agent</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs">
+                    {% for inst in bracket_1_7 %}
+                    <tr>
+                        <td class="px-6 py-3 font-bold text-slate-900 dark:text-white">{{ inst.loan.member.name }}</td>
+                        <td class="px-6 py-3 font-mono text-slate-500">{{ inst.loan.loan_account_no }}</td>
+                        <td class="px-6 py-3 text-slate-600 dark:text-slate-300">{{ inst.due_date|date:"d M Y" }}</td>
+                        <td class="px-6 py-3 font-bold text-slate-900 dark:text-white">₹{{ inst.pending_amount }}</td>
+                        <td class="px-6 py-3 text-slate-500">{{ inst.loan.assigned_agent.get_full_name|default:"Unassigned" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-6 text-center text-slate-400 text-xs">No accounts in 1-7 days overdue bracket.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

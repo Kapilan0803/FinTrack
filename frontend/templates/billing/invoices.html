@@ -1,0 +1,56 @@
+{% extends "app_base.html" %}
+
+{% block page_title %}Billing Invoices & Receipts{% endblock %}
+
+{% block app_content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-black text-slate-900 dark:text-white">Billing History & Tax Invoices</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Download GST tax invoices for your FinTrack subscription payments.</p>
+        </div>
+        <a href="{% url 'billing:pricing' %}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs transition-colors">
+            &larr; Subscription Status
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-navy-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase text-slate-400">
+                    <tr>
+                        <th class="px-6 py-3.5">Invoice #</th>
+                        <th class="px-6 py-3.5">Date</th>
+                        <th class="px-6 py-3.5">Base Amount</th>
+                        <th class="px-6 py-3.5">GST (18%)</th>
+                        <th class="px-6 py-3.5">Total Paid</th>
+                        <th class="px-6 py-3.5">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono text-xs">
+                    {% for inv in invoices %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                        <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ inv.invoice_number }}</td>
+                        <td class="px-6 py-4 font-sans text-slate-500">{{ inv.billing_date|date:"d M Y" }}</td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300">₹{{ inv.amount }}</td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300">₹{{ inv.tax_amount }}</td>
+                        <td class="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400 text-sm">₹{{ inv.total_amount }}</td>
+                        <td class="px-6 py-4 font-sans">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
+                                {{ inv.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center font-sans text-slate-400 text-xs">
+                            No paid invoices yet. You are currently on the 30-Day Free Trial!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
